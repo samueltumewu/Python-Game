@@ -1,4 +1,5 @@
 import turtle
+import math
 
 # Rectangle area boundaries
 LENGTH =                500
@@ -12,6 +13,8 @@ EXTRA_BUFFER =          10
 TARGET_SPEED =          2
 BULLET_SPEED =          5
 BULLET_MAX =            3
+MISSED_SHOT =           0
+SCORE =                 0
 
 def shooter_go_up():
     if(Game.ycor() < COR_RIGHT_TOP[1] + -(EXTRA_BUFFER)):
@@ -36,8 +39,9 @@ def draw_game_screen():
     Game_Screen.right(90)
     Game_Screen.forward(HEIGHT)
 def set_shooter_init_point():
-    Game.setposition(MIDPOINT_SHOOTER_INIT[0], MIDPOINT_SHOOTER_INIT[1])
-    Bullet.setposition(MIDPOINT_SHOOTER_INIT[0], MIDPOINT_SHOOTER_INIT[1])
+    Game.setposition(MIDPOINT_SHOOTER_INIT)
+    Game.showturtle()
+    Target.showturtle()
 def bullet_release():
     bullet_was_released = 0
     global bullet_on_fire
@@ -52,14 +56,29 @@ def bullet_release():
             break
     if bullet_was_released == 0:
         print("reloading...")
+def detect_collission():
+    for i in range(BULLET_MAX):
+        distance = math.sqrt(math.pow(Target.xcor()-Bullet[i].xcor(),2)+math.pow(Target.ycor()-Bullet[i].ycor(),2))
+        if distance < 10:
+            Bullet[i].hideturtle()
+            Target.hideturtle()
+            Bullet[i].clear()
+            Target.clear()
+            global SCORE
+            SCORE += 1
+            print(SCORE)
+            break
+    
 
 # The shooter
 Game = turtle.Turtle()
 Game.speed(0)
 Game.penup()
+Game.hideturtle()
 
 # The balloon
 Target = turtle.Turtle()
+Target.hideturtle()
 Target.color("red")
 Target.shape("circle")
 Target.penup()
@@ -70,12 +89,11 @@ Target.setposition(-250, 240-460)
 Bullet = []
 bullet_on_fire = []
 for i in range(BULLET_MAX):
-    Bullet.append(turtle.Turtle)
-    print(Bullet[i])
-    # Bullet[i].penup()
-    # Bullet[i].hideturtle()
-    # Bullet[i].setheading(180)
-    # bullet_on_fire[i] = 0 
+    Bullet.append(turtle.Turtle())
+    Bullet[i].hideturtle()
+    Bullet[i].penup()
+    Bullet[i].setheading(180)
+    bullet_on_fire.append(0)
 
 draw_game_screen()
 set_shooter_init_point()
@@ -94,14 +112,14 @@ while True:
 
     for i in range(BULLET_MAX):
         if bullet_on_fire[i] == 1:
-            x_cor = Bullet.xcor()
+            x_cor = Bullet[i].xcor()
             x_cor -= BULLET_SPEED
             Bullet[i].setx(x_cor)
-    # if is_fire == 1:
-    #     x_cor = Bullet.xcor()
-    #     x_cor -= BULLET_SPEED
-    #     Bullet.setx(x_cor)
 
-    if Bullet.xcor() < -270:
-        is_fire = 0
+    for i in range(BULLET_MAX):
+        if Bullet[i].xcor() < COR_LEFT_BOTTOM[0]:
+            bullet_on_fire[i] = 0
+            Bullet[i].clear()
+            
+    detect_collission()
 
