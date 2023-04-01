@@ -11,6 +11,7 @@ COR_LEFT_BOTTOM =       [-270, -220]
 EXTRA_BUFFER =          10
 TARGET_SPEED =          2
 BULLET_SPEED =          5
+BULLET_MAX =            3
 
 def shooter_go_up():
     if(Game.ycor() < COR_RIGHT_TOP[1] + -(EXTRA_BUFFER)):
@@ -35,16 +36,22 @@ def draw_game_screen():
     Game_Screen.right(90)
     Game_Screen.forward(HEIGHT)
 def set_shooter_init_point():
-    Game.setposition(MIDPOINT_SHOOTER_INIT)
-    Bullet.setposition(MIDPOINT_SHOOTER_INIT)
+    Game.setposition(MIDPOINT_SHOOTER_INIT[0], MIDPOINT_SHOOTER_INIT[1])
+    Bullet.setposition(MIDPOINT_SHOOTER_INIT[0], MIDPOINT_SHOOTER_INIT[1])
 def bullet_release():
-    global is_fire
-    if is_fire == 0:
-        Bullet.speed(0)
-        Bullet.hideturtle()
-        Bullet.setposition(Game.position())
-        Bullet.showturtle()
-        is_fire = 1
+    bullet_was_released = 0
+    global bullet_on_fire
+    for i in range(BULLET_MAX):
+        if bullet_on_fire[i] == 0:
+            Bullet[i].speed(0)
+            Bullet[i].hideturtle()
+            Bullet[i].setposition(Game.position())
+            Bullet[i].showturtle()
+            bullet_on_fire[i] = 1
+            bullet_was_released = 1
+            break
+    if bullet_was_released == 0:
+        print("reloading...")
 
 # The shooter
 Game = turtle.Turtle()
@@ -59,13 +66,16 @@ Target.penup()
 Target.speed(0)
 Target.setposition(-250, 240-460)
 
-# The bullet
-is_fire = 0
-Bullet = turtle.Turtle()
-Bullet.penup()
-Bullet.hideturtle()
-Bullet.setheading(180)
-
+# Multiple bullets
+Bullet = []
+bullet_on_fire = []
+for i in range(BULLET_MAX):
+    Bullet.append(turtle.Turtle)
+    print(Bullet[i])
+    # Bullet[i].penup()
+    # Bullet[i].hideturtle()
+    # Bullet[i].setheading(180)
+    # bullet_on_fire[i] = 0 
 
 draw_game_screen()
 set_shooter_init_point()
@@ -82,10 +92,15 @@ while True:
     y_cor += TARGET_SPEED
     Target.sety(y_cor)
 
-    if is_fire == 1:
-        x_cor = Bullet.xcor()
-        x_cor -= BULLET_SPEED
-        Bullet.setx(x_cor)
+    for i in range(BULLET_MAX):
+        if bullet_on_fire[i] == 1:
+            x_cor = Bullet.xcor()
+            x_cor -= BULLET_SPEED
+            Bullet[i].setx(x_cor)
+    # if is_fire == 1:
+    #     x_cor = Bullet.xcor()
+    #     x_cor -= BULLET_SPEED
+    #     Bullet.setx(x_cor)
 
     if Bullet.xcor() < -270:
         is_fire = 0
