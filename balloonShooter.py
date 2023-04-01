@@ -1,5 +1,6 @@
 import turtle
 import math
+import random as rand
 
 # Rectangle area boundaries
 LENGTH =                500
@@ -15,6 +16,9 @@ BULLET_SPEED =          5
 BULLET_MAX =            3
 MISSED_SHOT =           0
 SCORE =                 0
+TARGET_BATCH =          5
+TARGET_XCOR_RANGE =     [COR_LEFT_BOTTOM[0], (LENGTH/2)+COR_LEFT_BOTTOM[0]]
+# TARGET_YCOR_RANGE =     [-1*COR_LEFT_BOTTOM[1], -1*(COR_LEFT_BOTTOM[1]+200)]
 
 def shooter_go_up():
     if(Game.ycor() < COR_RIGHT_TOP[1] + -(EXTRA_BUFFER)):
@@ -41,7 +45,9 @@ def draw_game_screen():
 def set_shooter_init_point():
     Game.setposition(MIDPOINT_SHOOTER_INIT)
     Game.showturtle()
-    Target.showturtle()
+def show_targets():
+    for balloon in Target:
+        balloon.showturtle()
 def bullet_release():
     bullet_was_released = 0
     global bullet_on_fire
@@ -57,17 +63,18 @@ def bullet_release():
     if bullet_was_released == 0:
         print("reloading...")
 def detect_collission():
+    global SCORE
     for i in range(BULLET_MAX):
-        distance = math.sqrt(math.pow(Target.xcor()-Bullet[i].xcor(),2)+math.pow(Target.ycor()-Bullet[i].ycor(),2))
-        if distance < 10:
-            Bullet[i].hideturtle()
-            Target.hideturtle()
-            Bullet[i].clear()
-            Target.clear()
-            global SCORE
-            SCORE += 1
-            print(SCORE)
-            break
+        for j in range(TARGET_BATCH):
+            distance = math.sqrt(math.pow(Target[j].xcor()-Bullet[i].xcor(),2)+math.pow(Target[j].ycor()-Bullet[i].ycor(),2))
+            if distance < 10:
+                Bullet[i].hideturtle()
+                Target[j].hideturtle()
+                Bullet[i].clear()
+                Target[j].clear()
+                SCORE += 1
+                print(f"score: {SCORE}")
+                break
     
 
 # The shooter
@@ -77,13 +84,18 @@ Game.penup()
 Game.hideturtle()
 
 # The balloon
-Target = turtle.Turtle()
-Target.hideturtle()
-Target.color("red")
-Target.shape("circle")
-Target.penup()
-Target.speed(0)
-Target.setposition(-250, 240-460)
+Target = []
+for i in range(TARGET_BATCH):
+    Target.append(turtle.Turtle())
+    Target[i].hideturtle()
+    Target[i].color("red")
+    Target[i].shape("circle")
+    Target[i].penup()
+    Target[i].speed(0)
+    Target[i].setposition(
+        rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
+        -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
+        )
 
 # Multiple bullets
 Bullet = []
@@ -97,6 +109,7 @@ for i in range(BULLET_MAX):
 
 draw_game_screen()
 set_shooter_init_point()
+show_targets()
 
 turtle.listen()
 turtle.onkeypress(shooter_go_up, "Up")
@@ -106,9 +119,10 @@ turtle.onkeypress(bullet_release, "space")
 
 while True:
     # Enemy movement
-    y_cor = Target.ycor()
-    y_cor += TARGET_SPEED
-    Target.sety(y_cor)
+    for i in range(TARGET_BATCH):
+        y_cor = Target[i].ycor()
+        y_cor += TARGET_SPEED
+        Target[i].sety(y_cor)
 
     for i in range(BULLET_MAX):
         if bullet_on_fire[i] == 1:
