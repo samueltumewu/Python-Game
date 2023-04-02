@@ -70,7 +70,7 @@ def detect_collission():
     for i in range(BULLET_MAX):
         for j in range(TARGET_BATCH):
             distance = math.sqrt(math.pow(Target[j].xcor()-Bullet[i].xcor(),2)+math.pow(Target[j].ycor()-Bullet[i].ycor(),2))
-            if distance < BULLET_SPEED*0.6:
+            if bullet_on_fire[i] and distance < BULLET_SPEED*0.6:
                 Bullet[i].hideturtle()
                 Target[j].hideturtle()
 
@@ -82,6 +82,7 @@ def detect_collission():
                 Target[j].clear()
 
                 balloons_on_air[j] = 0
+                bullet_on_fire[i] = 0
                 SCORE += 1
                 print(f"score: {SCORE}")
                 break
@@ -137,6 +138,9 @@ turtle.onkeypress(bullet_release, "space")
 # turtle.mainloop()
 
 while True:
+    if SCORE == TARGET_BATCH:
+        break
+
     # Enemy movement
     for i in range(TARGET_BATCH):
         y_cor = Target[i].ycor()
@@ -160,9 +164,14 @@ while True:
             Bullet[i].setx(x_cor)
 
     for i in range(BULLET_MAX):
-        if Bullet[i].xcor() < COR_LEFT_BOTTOM[0]:
+        if bullet_on_fire[i] == 1 and Bullet[i].xcor() < COR_LEFT_BOTTOM[0]:
             bullet_on_fire[i] = 0
+            MISSED_SHOT += 1
+            print(f"Missed {MISSED_SHOT}")
+            Bullet[i].setposition(Game.position())
             Bullet[i].clear()
+
             
     detect_collission()
 
+turtle.mainloop()
