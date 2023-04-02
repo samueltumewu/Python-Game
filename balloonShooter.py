@@ -11,8 +11,8 @@ COR_RIGHT_TOP =         [230, 240]
 COR_RIGHT_BOTTOM =      [230, -220]
 COR_LEFT_BOTTOM =       [-270, -220]
 EXTRA_BUFFER =          10
-TARGET_SPEED =          2
-BULLET_SPEED =          5
+TARGET_SPEED =          8
+BULLET_SPEED =          TARGET_SPEED*10
 BULLET_MAX =            3
 MISSED_SHOT =           0
 SCORE =                 0
@@ -45,9 +45,12 @@ def draw_game_screen():
 def set_shooter_init_point():
     Game.setposition(MIDPOINT_SHOOTER_INIT)
     Game.showturtle()
-def show_targets():
-    for balloon in Target:
-        balloon.showturtle()
+def show_targets(index = -1):
+    if index == -1:
+        for balloon in Target:
+            balloon.showturtle()
+    else:
+        Target[index].showturtle()
 def bullet_release():
     bullet_was_released = 0
     global bullet_on_fire
@@ -67,15 +70,29 @@ def detect_collission():
     for i in range(BULLET_MAX):
         for j in range(TARGET_BATCH):
             distance = math.sqrt(math.pow(Target[j].xcor()-Bullet[i].xcor(),2)+math.pow(Target[j].ycor()-Bullet[i].ycor(),2))
-            if distance < 10:
+            if distance < BULLET_SPEED*0.6:
                 Bullet[i].hideturtle()
                 Target[j].hideturtle()
+
+                #put those objects out
+                Bullet[i].setposition(-800, -800)
+                Target[j].setposition(-800, -800)
+
                 Bullet[i].clear()
                 Target[j].clear()
+
+                balloons_on_air[j] = 0
                 SCORE += 1
                 print(f"score: {SCORE}")
                 break
-    
+def refresh_stray_balloons_position(_Target, _ycor):
+    Target = _Target
+    ycor = _ycor
+    if ycor > COR_LEFT_TOP[1]+5:
+        Target.setposition(
+                rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
+                -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
+                )
 
 # The shooter
 Game = turtle.Turtle()
@@ -83,8 +100,9 @@ Game.speed(0)
 Game.penup()
 Game.hideturtle()
 
-# The balloon
+# Multiple balloons
 Target = []
+balloons_on_air = []
 for i in range(TARGET_BATCH):
     Target.append(turtle.Turtle())
     Target[i].hideturtle()
@@ -96,6 +114,7 @@ for i in range(TARGET_BATCH):
         rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
         -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
         )
+    balloons_on_air.append(1)
 
 # Multiple bullets
 Bullet = []
@@ -120,9 +139,19 @@ turtle.onkeypress(bullet_release, "space")
 while True:
     # Enemy movement
     for i in range(TARGET_BATCH):
+        refresh_stray_balloons_position(Target[i], y_cor)
         y_cor = Target[i].ycor()
-        y_cor += TARGET_SPEED
-        Target[i].sety(y_cor)
+        if balloons_on_air[i] == 1:
+            y_cor += TARGET_SPEED
+            Target[i].sety(y_cor)
+        # UNREVEAL THIS TO ENABLE UNLIMITED BALLOONS!
+        # elif balloons_on_air[i] == 0:
+        #     Target[i].setposition(
+        #         rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
+        #         -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
+        #         )
+        #     balloons_on_air[i] = 1
+        #     show_targets(i) 
 
     for i in range(BULLET_MAX):
         if bullet_on_fire[i] == 1:
