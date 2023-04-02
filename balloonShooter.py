@@ -139,19 +139,19 @@ turtle.onkeypress(bullet_release, "space")
 while True:
     # Enemy movement
     for i in range(TARGET_BATCH):
-        refresh_stray_balloons_position(Target[i], y_cor)
         y_cor = Target[i].ycor()
         if balloons_on_air[i] == 1:
             y_cor += TARGET_SPEED
             Target[i].sety(y_cor)
-        # UNREVEAL THIS TO ENABLE UNLIMITED BALLOONS!
-        # elif balloons_on_air[i] == 0:
-        #     Target[i].setposition(
-        #         rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
-        #         -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
-        #         )
-        #     balloons_on_air[i] = 1
-        #     show_targets(i) 
+        ### UNREVEAL THIS TO ENABLE UNLIMITED BALLOONS!
+        ## elif balloons_on_air[i] == 0:
+        ##     Target[i].setposition(
+        ##         rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
+        ##         -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
+        ##         )
+        ##     balloons_on_air[i] = 1
+        ##     show_targets(i) 
+        refresh_stray_balloons_position(Target[i], y_cor)
 
     for i in range(BULLET_MAX):
         if bullet_on_fire[i] == 1:
