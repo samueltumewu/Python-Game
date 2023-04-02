@@ -18,7 +18,6 @@ MISSED_SHOT =           0
 SCORE =                 0
 TARGET_BATCH =          5
 TARGET_XCOR_RANGE =     [COR_LEFT_BOTTOM[0], (LENGTH/2)+COR_LEFT_BOTTOM[0]]
-# TARGET_YCOR_RANGE =     [-1*COR_LEFT_BOTTOM[1], -1*(COR_LEFT_BOTTOM[1]+200)]
 
 def shooter_go_up():
     if(Game.ycor() < COR_RIGHT_TOP[1] + -(EXTRA_BUFFER)):
@@ -94,6 +93,16 @@ def refresh_stray_balloons_position(_Target, _ycor):
                 rand.randint(TARGET_XCOR_RANGE[0], TARGET_XCOR_RANGE[1]), 
                 -1*rand.randint(HEIGHT/2, 100+(HEIGHT/2))
                 )
+def draw_missed_shot():
+    Missed_Shot_Turtle.speed(0)
+    Missed_Shot_Turtle.color("black")
+    Missed_Shot_Turtle.penup()
+    Missed_Shot_Turtle.setposition(0-(LENGTH/2),COR_LEFT_TOP[1])
+    Missed_Shot_Turtle.write("Missed Shot: %s" %MISSED_SHOT, False, align="left", font=("Arial",14,"normal" ))
+    Missed_Shot_Turtle.hideturtle()
+def update_missed_shot():
+    Missed_Shot_Turtle.clear()
+    Missed_Shot_Turtle.write("Missed Shot: %s" %MISSED_SHOT, False, align = "left", font = ("Arial", 14, "normal"))
 
 # The shooter
 Game = turtle.Turtle()
@@ -127,15 +136,18 @@ for i in range(BULLET_MAX):
     Bullet[i].setheading(180)
     bullet_on_fire.append(0)
 
+# Missed shot init
+Missed_Shot_Turtle = turtle.Turtle()
+
 draw_game_screen()
 set_shooter_init_point()
 show_targets()
+draw_missed_shot()
 
 turtle.listen()
-turtle.onkeypress(shooter_go_up, "Up")
-turtle.onkeypress(shooter_go_down, "Down")
-turtle.onkeypress(bullet_release, "space")
-# turtle.mainloop()
+turtle.onkey(shooter_go_up, "Up")
+turtle.onkey(shooter_go_down, "Down")
+turtle.onkey(bullet_release, "space")
 
 while True:
     if SCORE == TARGET_BATCH:
@@ -168,9 +180,10 @@ while True:
             bullet_on_fire[i] = 0
             MISSED_SHOT += 1
             print(f"Missed {MISSED_SHOT}")
+            update_missed_shot()
             Bullet[i].setposition(Game.position())
+            Bullet[i].hideturtle()
             Bullet[i].clear()
-
             
     detect_collission()
 
